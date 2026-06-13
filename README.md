@@ -4,6 +4,22 @@
 
 This project aims to demonstrate and learn how to use GitHub Actions effectively. It includes a simple C software program that prints its version and a "Hello World" message. The software is containerized using Docker, and its build, test, and deployment processes are automated through several GitHub Actions workflows. The versioning is dynamically managed via Git tags or commit hashes.
 
+## Makefile
+
+The Makefile is used to build the software and run tests. It uses the `$(BUILD_DIR)/app` directory to store the built artifacts.
+
+The following commands are available:
+- `make build`: Build the software
+- `make test`: Test the software
+- `make clean`: Clean the build directory
+
+## C Software
+
+The C software is a simple program that prints its version and a "Hello World" message. The version is defined in the git tag or hash and passed to the main function using env variables like:
+- `VERSION`: Version of the software (git tag or hash)
+
+The software has a simple unit test using the native C testing library to verify the software.
+
 ## Dockerfile
 
 The Docker image uses a multi-stage build process to ensure a minimal footprint:
