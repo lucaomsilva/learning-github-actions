@@ -23,8 +23,8 @@ The software has a simple unit test using the native C testing library to verify
 ## Dockerfile
 
 The Docker image uses a multi-stage build process to ensure a minimal footprint:
-1. **Build Stage**: Uses a base image (e.g., `alpine` or `ubuntu` with pinned, static versions) containing the necessary C build tools (`gcc`, `make`) to compile the application.
-2. **Final Stage**: A minimal base image that copies the compiled binary from the build stage, resulting in a small and secure final container.
+1. **Build Stage**: Uses `alpine:3.24.0` as the build environment. It installs pinned dependencies (`gcc=15.2.0-r5`, `make=4.4.1-r4`, `musl-dev=1.2.6-r2`), sets up the working directory, copies the source files, and runs the build command while allowing the injection of a `VERSION` argument.
+2. **Final Stage**: Uses `alpine:3.24.0` as a minimal runtime environment. It sets up the `/app` working directory and copies only the compiled binary from the build stage, resulting in a small and secure final container.
 
 ## CI/CD
 
