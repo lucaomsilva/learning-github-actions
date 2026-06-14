@@ -32,7 +32,8 @@ The continuous integration and deployment (CI/CD) pipelines are fully automated 
 
 ### Workflow Description
 
-- **`lint-and-test.yml`**: Runs automatically to lint the C source code and execute unit tests via the native C testing library, ensuring code quality and correctness.
+- **`lint.yml`**: Runs automatically on pushes and pull requests to the `main` and `develop` branches. It checks out the code, installs `cppcheck` on an `ubuntu-24.04` runner, and performs static analysis on the C source code (`src/` and `tests/`) using a strict configuration (`--enable=all --suppress=missingIncludeSystem --inconclusive --error-exitcode=1`) to enforce code quality and prevent bad code from being merged.
+- **`test.yml`**: Runs automatically to execute unit tests via the native C testing library, ensuring correctness.
 - **`build.yml`**: Responsible for checking out the code, setting up the C and Docker build environments, and compiling the software. It builds the Docker image and publishes it to Artifactory. It utilizes GitHub Actions caching, secrets, variables, and extracts the software version dynamically for tagging.
 - **`build_and_push.yml`**: Compiles the built Docker images and pushes them to the target container registry, securely utilizing tags for versioning.
 - **`deploy.yml`**: Triggered specifically when a new release or Git tag is created. It handles the official deployment and release process for the application.
