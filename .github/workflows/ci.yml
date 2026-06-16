@@ -57,3 +57,18 @@ jobs:
       - name: Build Application
         run: |
           docker exec build-env-${{ github.run_id }} make build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: bin/app
+
+  trigger_cd:
+    needs: build-env-docker
+    if: startsWith(github.ref, 'refs/tags/')
+    uses: ./.github/workflows/cd.yml
+    with:
+      tag: ${{ github.ref }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
