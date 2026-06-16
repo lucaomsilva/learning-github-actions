@@ -71,3 +71,12 @@ jobs:
       - name: Build Application
         run: |
           docker exec build-env-${{ github.run_id }} make build
+
+  clean-up:
+    runs-on: ubuntu-24.04
+    needs: validation
+    if: always()
+    steps:
+      - name: Clean Up Docker Build Environment
+        run: |
+          docker rm -f build-env-${{ github.run_id }}
