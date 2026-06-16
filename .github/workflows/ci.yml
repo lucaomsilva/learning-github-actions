@@ -46,38 +46,14 @@ jobs:
           -w /workspace \
           ghcr.io/${{ github.repository }}/build-env:latest sleep infinity
 
-  lint:
-    runs-on: ubuntu-24.04
-    needs: build-env-docker
-    steps:
       - name: Lint C Code
         run: |
           docker exec build-env-${{ github.run_id }} make lint
 
-  validation:
-    runs-on: ubuntu-24.04
-    needs: lint
-    steps:
       - name: Run Unit Tests
         run: |
           docker exec build-env-${{ github.run_id }} make test
 
-  build:
-    runs-on: ubuntu-24.04
-    needs: validation
-    permissions:
-      contents: read
-      packages: write
-    steps:
       - name: Build Application
         run: |
           docker exec build-env-${{ github.run_id }} make build
-
-  clean-up:
-    runs-on: ubuntu-24.04
-    needs: validation
-    if: always()
-    steps:
-      - name: Clean Up Docker Build Environment
-        run: |
-          docker rm -f build-env-${{ github.run_id }}
