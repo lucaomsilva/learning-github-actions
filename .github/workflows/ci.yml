@@ -38,33 +38,25 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/build-env:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/build-env:buildcache,mode=max
 
+      - name: Run Docker Build Environment
+        run: |
+          docker run -d --name build-env-${{ github.run_id }} \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          ghcr.io/${{ github.repository }}/build-env:latest sleep infinity
+
   lint:
     runs-on: ubuntu-24.04
+    needs: build-env-docker
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cppcheck
-
       - name: Lint C Code
         run: |
-          cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --error-exitcode=1 src/ tests/
+          docker exec build-env-${{ github.run_id }} make lint
 
-  test:
+  validation:
     runs-on: ubuntu-24.04
     needs: lint
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc make
-
       - name: Run Unit Tests
-        run: make test
-
+        run: |
+          docker exec build-env-${{ github.run_id }} make test
