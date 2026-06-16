@@ -41,6 +41,17 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/build-env:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/build-env:buildcache,mode=max
 
+      - name: Get Version
+        id: get_version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="${GITHUB_SHA::7}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Run Docker Build Environment
         run: |
           docker run -d --name build-env-${{ github.run_id }} \
@@ -58,7 +69,7 @@ jobs:
 
       - name: Build Application
         run: |
-          docker exec build-env-${{ github.run_id }} make build
+          docker exec build-env-${{ github.run_id }} make build VERSION=$VERSION
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
