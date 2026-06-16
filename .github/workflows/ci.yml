@@ -60,3 +60,14 @@ jobs:
       - name: Run Unit Tests
         run: |
           docker exec build-env-${{ github.run_id }} make test
+
+  build:
+    runs-on: ubuntu-24.04
+    needs: validation
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Build Application
+        run: |
+          docker exec build-env-${{ github.run_id }} make build
