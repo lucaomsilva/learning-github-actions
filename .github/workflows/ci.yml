@@ -5,35 +5,55 @@ on:
     branches: [ "main", "develop" ]
   push:
     branches: [ "main", "develop" ]
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
-  lint:
+  build-env-docker:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and Push Docker Build Environment
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/build-env:latest
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/build-env:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/build-env:buildcache,mode=max
+
+      - name: Run Docker Build Environment
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cppcheck
+          docker run -d --name build-env-${{ github.run_id }} \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          ghcr.io/${{ github.repository }}/build-env:latest sleep infinity
 
       - name: Lint C Code
         run: |
-          cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --error-exitcode=1 src/ tests/
-
-  test:
-    runs-on: ubuntu-24.04
-    needs: lint
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc make
+          docker exec build-env-${{ github.run_id }} make lint
 
       - name: Run Unit Tests
-        run: make test
+        run: |
+          docker exec build-env-${{ github.run_id }} make test
 
+      - name: Build Application
+        run: |
+          docker exec build-env-${{ github.run_id }} make build

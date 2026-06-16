@@ -15,9 +15,13 @@ CFLAGS += -DAPP_VERSION=\"$(VERSION)\"
 TARGET = $(BUILD_DIR)/app
 TEST_TARGET = $(BUILD_DIR)/test_app
 
+# Source directories
+SRC_DIRS = src
+TEST_DIRS = tests
+
 # Source files
-SRC = src/main.c src/hello/hello.c
-TEST_SRC = tests/test_hello.c src/hello/hello.c
+SRC = $(SRC_DIRS)/main.c $(SRC_DIRS)/hello/hello.c
+TEST_SRC = $(TEST_DIRS)/test_hello.c $(SRC_DIRS)/hello/hello.c
 
 # Color output
 BLUE=\033[0;34m
@@ -38,28 +42,39 @@ help: ## Display this help message
 ##@ Build
 
 $(BUILD_DIR): ## Create the build directory
-	mkdir -p $(BUILD_DIR)
+	@echo -e "$(BLUE)Creating build directory...$(NC)"
+	@mkdir -p $(BUILD_DIR)
+	@echo -e "$(GREEN)Build directory created!$(NC)"
 
 .PHONY: build
 build: $(TARGET) ## Build the software
 
 $(TARGET): $(SRC) | $(BUILD_DIR) ## Build the software
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+	
+##@ Lint
+
+.PHONY: lint
+lint: ## Lint the C code
+	@echo -e "$(BLUE)Linting C code...$(NC)"
+	@cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --error-exitcode=1 $(SRC_DIRS) $(TEST_DIRS)
+	@echo -e "$(GREEN)Lint completed!$(NC)"
 
 ##@ Tests
 
 .PHONY: test
 test: $(TEST_TARGET) ## Run the tests
-	@echo "==============================="
-	@echo "Running tests..."
-	./$(TEST_TARGET)
-	@echo "==============================="
+	@echo -e "$(BLUE)Running tests...$(NC)"
+	@./$(TEST_TARGET)
+	@echo -e "$(GREEN)Test completed!$(NC)"
 
 $(TEST_TARGET): $(TEST_SRC) | $(BUILD_DIR) ## Compile the tests
-	$(CC) $(CFLAGS) $(TEST_SRC) -o $(TEST_TARGET)
+	@$(CC) $(CFLAGS) $(TEST_SRC) -o $(TEST_TARGET)
 
 ##@ Clean
 
 .PHONY: clean
 clean: ## Clean the build directory
-	rm -rf $(BUILD_DIR)
+	@echo -e "$(BLUE)Cleaning build directory...$(NC)"
+	@rm -rf $(BUILD_DIR)
+	@echo -e "$(GREEN)Build directory cleaned!$(NC)"
