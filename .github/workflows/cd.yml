@@ -23,7 +23,8 @@ jobs:
       - name: validate
         run: |
           ls -la ./app_${{ inputs.tag }}_release
-          chmod +x ./app_${{ inputs.tag }}_release/app_${{ inputs.tag }}
+          chmod +x ./app_${{ inputs.tag }}_release/app
+          mv ./app_${{ inputs.tag }}_release/app ./app_${{ inputs.tag }}_release/app_${{ inputs.tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
