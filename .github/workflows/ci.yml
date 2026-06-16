@@ -57,3 +57,9 @@ jobs:
       - name: Build Application
         run: |
           docker exec build-env-${{ github.run_id }} make build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: bin/app
