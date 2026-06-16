@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -I./src
+CFLAGS = -Wall -Wextra -I./src -static
 
 # Directory for built artifacts
 BUILD_DIR = bin
